@@ -1,0 +1,12 @@
+DONUT/annotations/
+
+DONUT/testrun/
+
+YOLO/crop_image/
+YOLO/dataset/
+YOLO/images/
+YOLO/pdf/
+YOLO/pseudo_label/
+
+diagram_extraction/dataset/
+*.xlsx

@@ -1,0 +1,9 @@
+path: /Users/timothy/projects/Teebloc/whitespace/dataset/
+train: train/images
+val: val/images
+
+names: 
+  0: Open-ended
+  1: mcq
+  2: Cover
+  3: Ans

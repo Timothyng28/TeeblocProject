@@ -1,0 +1,10 @@
+path: /Users/timothy/projects/Teebloc/mcqSegmentation/diagram_extraction/dataset/
+train: train/images
+val: val/images
+
+names: 
+  0: O-diagram-1
+  1: O-diagram-2
+  2: O-diagram-3
+  3: O-diagram-4
+  4: diagram

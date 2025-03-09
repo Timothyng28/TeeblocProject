@@ -1,0 +1,16 @@
+**/dataset/
+**/weights/
+**/images/
+*.pt
+**/annotations/
+**/concatenated/
+**/pdf/
+**/Old datasets/
+*.pem
+**/pseudo_label/
+**/tiled_dataset/
+*.json
+**/crop_image/
+/Sparrow UI/
+/Sparrow-UI-main/
+**/DONUT/

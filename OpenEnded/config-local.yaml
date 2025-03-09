@@ -1,0 +1,6 @@
+path: /Users/timothy/projects/Teebloc/OpenEnded/dataset
+train: train/images
+val: val/images
+
+names: 
+  0: Question
