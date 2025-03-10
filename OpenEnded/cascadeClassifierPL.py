@@ -25,54 +25,52 @@ def pseudo_label_images(image, image_filename, model):
     confs = torch.tensor(results[0].boxes.conf)
     classes = torch.tensor(results[0].boxes.cls)
 
-    # remove overlapping predictions
+    # remove overlapping predictions using NMS
     indices = torch.ops.torchvision.nms(boxes, confs, iou_threshold=0.01)
     boxes = boxes[indices].tolist()
     confs = confs[indices].tolist()
     classes = classes[indices].tolist()
 
+    # Filter for low-confidence boxes (<= 0.75)
+    filtered_data = []
+    for box, conf, cls in zip(boxes, confs, classes):
+        if conf > 0.75:  # Skip high confidence boxes
+            continue
+        filtered_data.append((box, conf, cls))
+
+    # If there are no low-confidence bounding boxes, skip saving.
+    if len(filtered_data) == 0:
+        print(f"No low confidence bounding boxes for {image_filename}. Skipping saving.")
+        return
+
     # Define file paths
     base_file_name = os.path.splitext(image_filename)[0]
-    image_file_path = os.path.join(pseudo_label_path, "images", f"{base_file_name}.jpg")
-    txt_file_path = os.path.join(pseudo_label_path, "annotations", f"{base_file_name}.txt")
     vis_image_file_path = os.path.join(pseudo_label_path, "vis_img", f"{base_file_name}_vis.jpg")
 
-    # Save the image
-    cv2.imwrite(image_file_path, image)
-    print(f"Saved image: {image_file_path}")
 
     # Create a copy of the image for visualization
     vis_image = image.copy()
 
-    # Save the YOLO annotation file
-    with open(txt_file_path, 'w') as txt_file:
-        for box, conf, cls in zip(boxes, confs, classes):
-            if conf < 0.3:  # Confidence threshold
-                continue
+    for box, conf, cls in filtered_data:
+        x1, y1, x2, y2 = map(int, box)
 
-            x1, y1, x2, y2 = map(int, box)
-            
-            # Assign bounding box color based on confidence
-            color = (0, 255, 0) if conf >= 0.75 else (0, 0, 255)
+        # Set color to red for all low-confidence boxes
+        color = (0, 0, 255)
 
-            # Draw bounding box on visualization image
-            cv2.rectangle(vis_image, (x1, y1), (x2, y2), color, 2)
-            
-            # Add class ID and confidence text
-            label = f"{cls} {conf:.2f}"
-            cv2.putText(vis_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 2)
+        # Draw bounding box on visualization image
+        cv2.rectangle(vis_image, (x1, y1), (x2, y2), color, 2)
+        
+        # Add class ID and confidence text
+        #label = f"{cls} {conf:.2f}"
+        #cv2.putText(vis_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, color, 2)
 
-            # Normalize coordinates for YOLO format
-            img_h, img_w = image.shape[:2]
-            x_center = (x1 + x2) / 2 / img_w
-            y_center = (y1 + y2) / 2 / img_h
-            width = (x2 - x1) / img_w
-            height = (y2 - y1) / img_h
+        # Normalize coordinates for YOLO format
+        img_h, img_w = image.shape[:2]
+        x_center = (x1 + x2) / 2 / img_w
+        y_center = (y1 + y2) / 2 / img_h
+        width = (x2 - x1) / img_w
+        height = (y2 - y1) / img_h
 
-            # Write annotation in YOLO format
-            txt_file.write(f"{cls} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
-    
-    print(f"Saved annotations: {txt_file_path}")
 
     # Save the visualization image
     cv2.imwrite(vis_image_file_path, vis_image)
