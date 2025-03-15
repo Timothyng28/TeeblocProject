@@ -8,5 +8,7 @@ YOLO/images/
 YOLO/pdf/
 YOLO/pseudo_label/
 
+whitespace/OpenEndedjpg/
+
 diagram_extraction/dataset/
 *.xlsx
