@@ -34,7 +34,7 @@ def pseudo_label_images(image, image_filename, model):
     # Filter for low-confidence boxes (<= 0.75)
     filtered_data = []
     for box, conf, cls in zip(boxes, confs, classes):
-        if conf > 0.75:  # Skip high confidence boxes
+        if conf > 0.6:  # Skip high confidence boxes
             continue
         filtered_data.append((box, conf, cls))
 
