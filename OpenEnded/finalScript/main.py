@@ -24,7 +24,7 @@ current_image = np.ones((1, 1654, 3), dtype=np.uint8) * 255  # Fixed width 1654p
 counter = 1  
 
 # Loop through each image in the input directory
-for jpg_file in os.listdir(input_path):
+for jpg_file in sorted(os.listdir(input_path)):
     if jpg_file.endswith('.jpg'):
         image_path = os.path.join(input_path, jpg_file)
 
@@ -81,7 +81,7 @@ for jpg_file in os.listdir(input_path):
             counter += 1
 
         # Add the remaining bottom part of the image (from last bounding box to bottom)
-        current_image = image_np[top:, :]
+        current_image = np.concatenate((current_image, image_np[top:, :]), axis = 0)
 
 # Save the final remaining concatenation
 output_file_path = os.path.join(output_path, f"{base_file_name}_{counter}.jpg")
