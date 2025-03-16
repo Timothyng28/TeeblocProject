@@ -15,6 +15,14 @@ os.makedirs(output_path, exist_ok=True)
 # Load YOLO model
 model = YOLO('/Users/timothy/projects/Teebloc/OpenEnded/runs/detect/train6/weights/best.pt')
 
+# Create a white placeholder image
+current_image = np.ones((1, 1654, 3), dtype=np.uint8) * 255  # Fixed width 1654px
+
+
+
+# Counter for naming output images
+counter = 1  
+
 # Loop through each image in the input directory
 for jpg_file in os.listdir(input_path):
     if jpg_file.endswith('.jpg'):
@@ -43,14 +51,8 @@ for jpg_file in os.listdir(input_path):
         # Sort bounding boxes by vertical position (y1)
         boxes.sort(key=lambda x: x[1])
 
-        # Create a white placeholder image
-        current_image = np.ones((1, 1654, 3), dtype=np.uint8) * 255  # Fixed width 1654px
-
         # Initialize top boundary
         top = 0
-
-        # Counter for naming output images
-        counter = 1  
 
         # Loop through bounding boxes and extract regions
         for i, (box, conf, cls) in enumerate(zip(boxes, confs, classes)):
