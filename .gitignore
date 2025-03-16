@@ -16,4 +16,5 @@
 **/DONUT/
 **/temp/
 whitespace/OpenEndedjpg/
-*.DS_Store
+.DS_Store
+**/.DS_Store
