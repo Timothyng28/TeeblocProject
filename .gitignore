@@ -18,3 +18,5 @@
 whitespace/OpenEndedjpg/
 .DS_Store
 **/.DS_Store
+**/input/
+**/output/
