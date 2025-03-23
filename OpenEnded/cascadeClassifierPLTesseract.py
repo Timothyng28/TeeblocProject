@@ -32,7 +32,7 @@ def pseudo_label_images(image, image_filename, model):
     # Filter for low-confidence boxes (<= 0.75)
     filtered_data = []
     for box, conf, cls in zip(boxes, confs, classes):
-        if conf > 0.7:  # Skip high confidence boxes
+        if conf > 0.8:  # Skip high confidence boxes
             continue
         filtered_data.append((box, conf, cls))
 
@@ -57,6 +57,14 @@ def pseudo_label_images(image, image_filename, model):
 
 # Process each JPG file in the directory
 for jpg_file in os.listdir(jpg_path):
+    file_path = os.path.join(jpg_path, jpg_file)
+
+    print(file_path)
+
+    # Skip directories like images/temp
+    if not os.path.isfile(file_path):
+        continue
+
     if jpg_file.endswith('.jpg'):  # Ensure it's an image file
         image_path = os.path.join(jpg_path, jpg_file)
         

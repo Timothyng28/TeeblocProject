@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+from OCR_utils import has_leading_number
 import cv2
 import os
 import numpy as np
@@ -57,12 +58,15 @@ for jpg_file in sorted(os.listdir(input_path)):
         # Loop through bounding boxes and extract regions
         for i, (box, conf, cls) in enumerate(zip(boxes, confs, classes)):
             x1, y1, x2, y2 = map(int, box)
-
-            if conf < 0.6:  # Confidence threshold
+            print("jpg_file", conf)
+            if conf < 0.3:  # Confidence threshold
                 continue
-            elif conf < 0.8:
+            elif conf < 0.8: # Cascade classifier for low confidence
                 # cascade classifier
                 cropped_bbox = image_np[y1:y2, 0:x2]
+                print(has_leading_number(cropped_bbox))
+                if cropped_bbox.size == 0 or not has_leading_number(cropped_bbox):
+                    continue
 
             
 

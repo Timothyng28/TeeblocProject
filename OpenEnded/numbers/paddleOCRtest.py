@@ -28,7 +28,7 @@ for image_file in os.listdir(IMAGE_PATH):
 
         # Extract text from first result if it exists
         if results and results[0]:
-            text = results[0][0][1][0]
+            text = results[0][0][1][0].strip()
         else:
             text = ""
 
