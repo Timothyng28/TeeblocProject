@@ -9,5 +9,6 @@ def has_leading_number(image_np: np.ndarray) -> bool:
     results = ocr.ocr(image_rgb, cls=True)
     if results and results[0]:
         text = results[0][0][1][0].strip()
+        print(f"Extracted text: {text}")
         return text and text[0].isdigit()
     return False

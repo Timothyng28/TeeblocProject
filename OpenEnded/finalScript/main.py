@@ -1,98 +1,38 @@
-from ultralytics import YOLO
-from OCR_utils import has_leading_number
-import cv2
 import os
-import numpy as np
-import torch
+from pdf_crop_utils import extract_open_ended_crops_from_pdf_bytes
+from OEsegmentation_utils import OEsegmentation
 
-# Set directory paths
+# === Setup paths ===
 data_path = '/Users/timothy/projects/Teebloc/OpenEnded/finalScript'
+input_path = os.path.join(data_path, "input")
 output_path = os.path.join(data_path, "output")
-input_path = os.path.join(data_path, "input")  # in jpg
-
-# Ensure required directories exist
 os.makedirs(output_path, exist_ok=True)
 
-# Load YOLO model
-model = YOLO('/Users/timothy/projects/Teebloc/OpenEnded/runs/detect/train6/weights/best.pt')
+# === Get all PDFs ===
+pdf_files = [f for f in os.listdir(input_path) if f.endswith('.pdf')]
 
-# Create a white placeholder image
-current_image = np.ones((1, 1654, 3), dtype=np.uint8) * 255  # Fixed width 1654px
+if not pdf_files:
+    print("🚫 No PDF files found in input directory.")
+else:
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(input_path, pdf_file)
+        print(f"\n📄 Processing: {pdf_file}")
 
+        # Read as bytes
+        with open(pdf_path, "rb") as f:
+            pdf_bytes = f.read()
 
+        # Step 1: Crop using YOLO
+        cropped_images = extract_open_ended_crops_from_pdf_bytes(pdf_bytes, pdf_name=pdf_file)
 
-# Counter for naming output images
-counter = 1  
-
-# Loop through each image in the input directory
-for jpg_file in sorted(os.listdir(input_path)):
-    if jpg_file.endswith('.jpg'):
-        image_path = os.path.join(input_path, jpg_file)
-
-        # Read image with OpenCV
-        image_np = cv2.imread(image_path)
-        if image_np is None:
-            print(f"Error loading image: {image_path}. Skipping.")
+        if not cropped_images:
+            print(f"⚠️ No open-ended content detected in {pdf_file}")
             continue
 
-        # Run the model on the image
-        results = model(image_np)
+        # Step 2: Generate synthetic filenames
+        filenames = [f"{os.path.splitext(pdf_file)[0]}_page{i+1}.jpg" for i in range(len(cropped_images))]
 
-        # Convert results to tensors
-        boxes = torch.tensor(results[0].boxes.xyxy)
-        confs = torch.tensor(results[0].boxes.conf)
-        classes = torch.tensor(results[0].boxes.cls)
+        # Step 3: Run segmentation (includes OCR)
+        OEsegmentation(cropped_images, filenames)
 
-        # Remove overlapping predictions using NMS
-        indices = torch.ops.torchvision.nms(boxes, confs, iou_threshold=0.01)
-        boxes = boxes[indices].tolist()
-        confs = confs[indices].tolist()
-        classes = classes[indices].tolist()
-
-        # Sort bounding boxes by vertical position (y1)
-        boxes.sort(key=lambda x: x[1])
-
-        # Initialize top boundary
-        top = 0
-
-        # Loop through bounding boxes and extract regions
-        for i, (box, conf, cls) in enumerate(zip(boxes, confs, classes)):
-            x1, y1, x2, y2 = map(int, box)
-            print("jpg_file", conf)
-            if conf < 0.3:  # Confidence threshold
-                continue
-            elif conf < 0.8: # Cascade classifier for low confidence
-                # cascade classifier
-                cropped_bbox = image_np[y1:y2, 0:x2]
-                print(has_leading_number(cropped_bbox))
-                if cropped_bbox.size == 0 or not has_leading_number(cropped_bbox):
-                    continue
-
-            
-
-            # Crop from the current top to the next bounding box's top
-            next_image = image_np[top:y1, :]
-            current_image = np.concatenate((current_image, next_image), axis=0)
-
-            # Define output file path
-            base_file_name = os.path.splitext(jpg_file)[0]
-            output_file_path = os.path.join(output_path, f"{base_file_name}_{counter}.jpg")
-
-            # Save the concatenated image after each step
-            cv2.imwrite(output_file_path, current_image)
-            print(f"✅ Saved image {counter}: {output_file_path}")
-            current_image = np.ones((1, 1654, 3), dtype=np.uint8) * 255  # Fixed width 1654px
-
-            # Update top to the current bounding box's top
-            top = y1
-
-            # Increment the counter for unique filenames
-            counter += 1
-
-        # Add the remaining bottom part of the image (from last bounding box to bottom)
-        current_image = np.concatenate((current_image, image_np[top:, :]), axis = 0)
-
-# Save the final remaining concatenation
-output_file_path = os.path.join(output_path, f"{base_file_name}_{counter}.jpg")
-cv2.imwrite(output_file_path, current_image)
-print(f"✅ Saved final image {counter}: {output_file_path}")
+        print(f"✅ Done: {pdf_file}")

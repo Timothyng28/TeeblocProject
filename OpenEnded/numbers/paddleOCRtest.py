@@ -57,7 +57,7 @@ for image_file in os.listdir(IMAGE_PATH):
             annotated_image_bgr = cv2.cvtColor(np.array(annotated_image), cv2.COLOR_RGB2BGR)
 
             # Save visualization image
-            vis_path = os.path.join(OUTPUT_PATH, f"vis_{image_file}")
+            vis_path = os.path.join(OUTPUT_PATH, f"b_vis_{image_file}")
             cv2.imwrite(vis_path, annotated_image_bgr)
             print(f"Visualization saved to {vis_path}")
 
