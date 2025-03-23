@@ -56,10 +56,15 @@ for jpg_file in sorted(os.listdir(input_path)):
 
         # Loop through bounding boxes and extract regions
         for i, (box, conf, cls) in enumerate(zip(boxes, confs, classes)):
+            x1, y1, x2, y2 = map(int, box)
+
             if conf < 0.6:  # Confidence threshold
                 continue
+            elif conf < 0.8:
+                # cascade classifier
+                cropped_bbox = image_np[y1:y2, 0:x2]
 
-            x1, y1, x2, y2 = map(int, box)
+            
 
             # Crop from the current top to the next bounding box's top
             next_image = image_np[top:y1, :]

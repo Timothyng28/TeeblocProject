@@ -18,7 +18,7 @@ for image_file in os.listdir(IMAGE_PATH):
         image = Image.open(image_path)
 
         # Use pytesseract to extract text
-        text = pytesseract.image_to_string(image).strip()
+        text = pytesseract.image_to_string(image, config="--psm 6").strip()
 
         # Print extracted text
         print(f"Extracted text from {image_file}: {text}")

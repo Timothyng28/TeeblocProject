@@ -48,7 +48,7 @@ def pseudo_label_images(image, image_filename, model):
         x1, y1, x2, y2 = map(int, box)
 
         # Crop the detected object
-        cropped_image = image[y1:y2, x1:x2]
+        cropped_image = image[y1:y2, 0:x2]
 
         # Save cropped image
         cropped_image_file_path = os.path.join(pseudo_label_path, "cropped", f"{base_file_name}_cropped_{i}.jpg")
