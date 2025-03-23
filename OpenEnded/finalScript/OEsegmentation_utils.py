@@ -48,6 +48,11 @@ def OEsegmentation(images, filenames):
                 continue
             elif conf < 0.8:
                 cropped = image_np[y1:y2, 0:x2]
+
+                # save cropped image for debugging
+                #debug_crop_path = os.path.join(output_path, f"debug_crop_{base_file_name}_{counter}.jpg")
+                # cv2.imwrite(debug_crop_path, cropped)
+
                 if cropped.size == 0 or not has_leading_number(cropped):
                     continue
 
